@@ -1,0 +1,23 @@
+﻿@model MVCBank.ViewModels.RandomManagerViewModel
+@{
+    ViewBag.Title = "Random";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@{
+    var className = Model.Clients.Count > 0 ? "popular" : null;
+}
+
+<h2 class="@className">@Model.Manager.Name</h2>
+
+@if (Model.Clients.Count == 0)
+{
+    <text>No one has deposit</text>
+}
+<ul>
+    @foreach (var client in Model.Clients)
+    {
+        <li>@client.Name</li>
+    }
+</ul>
+
+

@@ -1,0 +1,33 @@
+﻿@model IEnumerable<MVCBank.Models.Manager>
+@{
+    ViewBag.Title = "Managers";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Managers</h2>
+
+@if (!Model.Any())
+{
+    <p>We don't have any managers yet.</p>
+}
+else
+{
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Manager</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var manager in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.ActionLink(manager.Name, "Details", "Managers", new { id = manager.Id }, null)
+                    </td>
+                </tr>
+
+            }
+        </tbody>
+    </table>
+}
