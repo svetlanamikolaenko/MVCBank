@@ -7,7 +7,7 @@
     var className = Model.Clients.Count > 0 ? "popular" : null;
 }
 
-<h2 class="@className">@Model.Manager.Name</h2>
+<h2 class="@className">@Model.Manager.FullName</h2>
 
 @if (Model.Clients.Count == 0)
 {

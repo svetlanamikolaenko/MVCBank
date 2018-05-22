@@ -1,82 +1,92 @@
 ﻿using System;
+using System.Data.Entity;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using MVCBank.Models;
 using MVCBank.ViewModels;
-
+using System.Data.Entity;
 
 namespace MVCBank.Controllers
 {
     public class ManagersController : Controller
     {
-        // GET: Managers/Random
-        public ActionResult Random()
+        private ApplicationDbContext _context;
+
+        public ManagersController()
         {
-            var manager = new Manager() { Name = "Shrek!" };
-            var clients = new List<Client>
-            {
-                new Client {Name = "Client 1"},
-                new Client {Name = "Client 2"}
-            };
+            _context = new ApplicationDbContext();
+        }
 
-            var viewModel = new RandomManagerViewModel
-            {
-                Manager = manager,
-                Clients = clients
-            };
+        protected override void Dispose(bool disposing)
+        {
+            _context.Dispose();
+        }
 
-            return View(viewModel);
+        public ViewResult Index()
+        {
+            return View();
+        }
+
+        public ActionResult Create()
+        {
+            var role = _context.Role.ToList();
+            var viewModel = new ManagerFormViewModel
+            {   
+                Manager = new Manager(),
+                Role = role
+            };
+            return View("ManagerForm", viewModel);
         }
 
         public ActionResult Edit(int id)
         {
-            return Content("id = " + id);
-        }
-
-        //managers
-        /*
-        public ActionResult Index()
-        {
-            var manager = new List<Manager>
-            {
-                new Manager{Name = "Man 1"},
-                new Manager{Name = "Man 2"}
-            };
-
-            var viewModel = new ManagerViewModel
-            {
-                Manager = manager
-            };
-            return View(viewModel);
-            }
-            */
-        /*
-        if (!pageIndex.HasValue)
-            pageIndex = 1;
-
-        if (String.IsNullOrWhiteSpace(sortBy))
-            sortBy = "Name";
-        return Content(String.Format("pageIndex={0}&sortBy={1}", pageIndex, sortBy));
-        */
-
-
-        public ViewResult Index()
-        {
-            var managers = GetManagers();
-
-            return View(managers);
-        }
-
-        public ActionResult Details(int id)
-        {
-            var manager = GetManagers().SingleOrDefault(c => c.Id == id);
+            var manager = _context.Manager.SingleOrDefault(c => c.Id == id);
             if (manager == null)
                 return HttpNotFound();
-            return View(manager);
+
+            var viewModel = new ManagerFormViewModel
+            {
+                Manager = manager,
+                Role = _context.Role.ToList()
+            };
+            return View("ManagerForm", viewModel);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Save(Manager manager)
+        {
+            if (!ModelState.IsValid)
+            {
+                var viewModel = new ManagerFormViewModel()
+                {
+                    Manager = manager,
+                    Role = _context.Role.ToList()
+                };
+
+                return View("ManagerForm", viewModel);
+            }
+
+            if (manager.Id == 0)
+            {
+                _context.Manager.Add(manager);
+            }
+            else
+            {
+                var managerInDb = _context.Manager.Single(c => c.Id == manager.Id);
+                managerInDb.FirstName = manager.FirstName;
+                managerInDb.LastName = manager.LastName;
+                managerInDb.RoleId = manager.RoleId;
+            }
+            
+            _context.SaveChanges();
+            return RedirectToAction("Index", "Managers");
+        }
+
+        
+        /*
         private IEnumerable<Manager> GetManagers()
         {
             return new List<Manager>
@@ -85,5 +95,6 @@ namespace MVCBank.Controllers
                 new Manager { Id = 2, Name = "Triniti" }
             };
         }
+        */
     }
 }
