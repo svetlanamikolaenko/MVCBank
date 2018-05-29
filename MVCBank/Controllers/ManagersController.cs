@@ -6,7 +6,6 @@ using System.Web;
 using System.Web.Mvc;
 using MVCBank.Models;
 using MVCBank.ViewModels;
-using System.Data.Entity;
 
 namespace MVCBank.Controllers
 {
@@ -26,9 +25,14 @@ namespace MVCBank.Controllers
 
         public ViewResult Index()
         {
-            return View();
+            if (User.IsInRole("CanManageUsers"))
+                return View("List");
+
+            return View("ReadOnlyList");
         }
 
+
+        [Authorize(Roles = "CanManageUsers")]
         public ActionResult Create()
         {
             var role = _context.Role.ToList();
@@ -40,6 +44,7 @@ namespace MVCBank.Controllers
             return View("ManagerForm", viewModel);
         }
 
+        [Authorize(Roles = "CanManageUsers")]
         public ActionResult Edit(int id)
         {
             var manager = _context.Manager.SingleOrDefault(c => c.Id == id);
@@ -56,6 +61,7 @@ namespace MVCBank.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "CanManageUsers")]
         public ActionResult Save(Manager manager)
         {
             if (!ModelState.IsValid)
